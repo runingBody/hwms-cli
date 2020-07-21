@@ -14,7 +14,7 @@ class NewCommand {
         program
             .command('new [projectName]')
             .alias('n')
-            .description('Generate Hwms applicatio')
+            .description('Create Hwms application')
             .option('-d, --dry-run', 'Allow to test changes before executing the command')
             .option('-g, --skip-git', 'Allow to skip git repository initialization')
             .option('-s, --skip-install', 'Allow to skip packages installation')
