@@ -21,13 +21,12 @@ class AbstractRunner {
             const args = [command, url, '-b', branchName];
             const options = {
                 env: Object.assign(Object.assign({}, process.env), { PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: '1' }),
-                cwd,
+                // cwd,
                 stdio: collect ? 'pipe' : 'inherit',
-                shell: true,
+                // shell: true,
             };
             return new Promise((resolve, reject) => {
-                console.log('args', args);
-                const child = child_process_1.spawn(`${this.binary}`, args);
+                const child = child_process_1.spawn(`${this.binary}`, args, options);
                 let result = [];
                 let errorResult = [];
                 if (collect) {
@@ -51,8 +50,7 @@ class AbstractRunner {
                             errorResult.push(str);
                         });
                     }
-                }
-                else {
+                } else {
                     if (child.stderr) {
                         child.stderr.pipe(process.stderr);
                     }

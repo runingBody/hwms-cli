@@ -42,13 +42,16 @@ const generateFiles = (inputs) => __awaiter(void 0, void 0, void 0, function* ()
         const branchName = getApplicationInput(inputs, 'branch').value;
 
         yield cloneGitRepository(projectDirectory, branchName, url);
-        printCollective();
+    
+        console.log(chalk.green('\n Clone Success !\n'))
+
+        // printCollective();
         process.exit(0);
     }
     catch (error) {
         if (error && error.message) {
             process.exit(0);
-            // console.error(chalk.red(error));
+            console.error(chalk.red(error));
         }
     }
 });
@@ -63,6 +66,7 @@ const cloneGitRepository = (dir, branchName, url) => __awaiter(void 0, void 0, v
 const getApplicationInput = (inputs, name) => inputs.find((input) => input.name === name);
 
 const printCollective = () => {
+    console.log('lr printCollective');
     const dim = print('dim');
     const yellow = print('yellow');
     const emptyLine = print();
@@ -80,6 +84,8 @@ const printCollective = () => {
     emptyLine();
 };
 const print = (color = null) => (str = '') => {
+    console.log('lr print color', color);
+
     const terminalCols = exports.retrieveCols();
     const strLength = str.replace(/\u001b\[[0-9]{2}m/g, '').length;
     const leftPaddingLength = Math.floor((terminalCols - strLength) / 2);
