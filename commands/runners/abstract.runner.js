@@ -16,14 +16,18 @@ class AbstractRunner {
     constructor(binary) {
         this.binary = binary;
     }
-    run(command, collect = false, cwd = process.cwd(), url, progress) {
+    run(command, branchName, url, collect = false, cwd = process.cwd(), progress) {
         return __awaiter(this, void 0, void 0, function* () {
-            const args = [command];
+            const args = [command, url, '-b', branchName];
             const options = {
-                url: url
+                env: Object.assign(Object.assign({}, process.env), { PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: '1' }),
+                cwd,
+                stdio: collect ? 'pipe' : 'inherit',
+                shell: true,
             };
             return new Promise((resolve, reject) => {
-                const child = child_process_1.spawn(`${this.binary}`, args, options);
+                console.log('args', args);
+                const child = child_process_1.spawn(`${this.binary}`, args);
                 let result = [];
                 let errorResult = [];
                 if (collect) {

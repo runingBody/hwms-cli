@@ -15,12 +15,12 @@ const abstract_command_1 = require("./abstract.command");
 class CloneCommand extends abstract_command_1.AbstractCommand {
     load(program) {
         program
-            .command('clone <versions> [name]')
+            .command('clone [projectName] [branch]')
             .alias('c')
             .description(this.buildDescription())
             .option('--dry-run', 'Allow to test changes before command execution')
             .option('--registry [registry]', 'npm 地址默认值 http://nexus.saas.hand-china.com/content/groups/hzero-npm-group/')
-            .action((versions, name, command) => __awaiter(this, void 0, void 0, function* () {
+            .action((projectName, branch, command) => __awaiter(this, void 0, void 0, function* () {
                 const options = [];
                 options.push({ name: 'dry-run', value: !!command.dryRun });
                 options.push({
@@ -29,8 +29,8 @@ class CloneCommand extends abstract_command_1.AbstractCommand {
                         'http://nexus.saas.hand-china.com/content/groups/hzero-npm-group/',
                 });
                 const inputs = [];
-                inputs.push({ name: 'versions', value: versions });
-                inputs.push({ name: 'name', value: name });
+                inputs.push({ name: 'projectName', value: projectName });
+                inputs.push({ name: 'branch', value: branch });
                 yield this.action.handle(inputs, options);
             }));
     }
@@ -42,7 +42,7 @@ class CloneCommand extends abstract_command_1.AbstractCommand {
     buildVersionListAsTable() {
         const leftMargin = '    ';
         const tableConfig = {
-            head: ['version', 'type', 'alias'],
+            head: ['branch', 'type', 'alias'],
             chars: {
                 'left': leftMargin.concat('│'),
                 'top-left': leftMargin.concat('┌'),

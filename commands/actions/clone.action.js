@@ -31,15 +31,17 @@ const generateFiles = (inputs) => __awaiter(void 0, void 0, void 0, function* ()
 
         const url = 'https://code.choerodon.com.cn/happs-wmsdc/wms-ips-vue.git'; // tplObj[templateName]
 
-        const projectName = 'wms-ips-vue'
+        // const projectName = 'wms-ips-vue'
 
         console.log(chalk.green('\n Start clone source code form origin ... \n'))
         // 出现加载图标
         const spinner = ora("Cloning...");
         spinner.start();
 
-        const projectDirectory = getApplicationNameInput(inputs).value;
-        yield cloneGitRepository(projectDirectory, url);
+        const projectDirectory = getApplicationInput(inputs, 'projectName').value;
+        const branchName = getApplicationInput(inputs, 'branch').value;
+
+        yield cloneGitRepository(projectDirectory, branchName, url);
         printCollective();
         process.exit(0);
     }
@@ -51,14 +53,14 @@ const generateFiles = (inputs) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 
-const cloneGitRepository = (dir, url) => __awaiter(void 0, void 0, void 0, function* () {
+const cloneGitRepository = (dir, branchName, url) => __awaiter(void 0, void 0, void 0, function* () {
     const runner = new git_runner_1.GitRunner();
-    yield runner.run('clone', true, path_1.join(process.cwd(), dir), url).catch(() => {
+    yield runner.run('clone', branchName, url, true, path_1.join(process.cwd(), dir)).catch(() => {
         console.error(chalk.red('Git repository clone failed'));
     });
 });
 
-const getApplicationNameInput = (inputs) => inputs.find((input) => input.name === 'name');
+const getApplicationInput = (inputs, name) => inputs.find((input) => input.name === name);
 
 const printCollective = () => {
     const dim = print('dim');
