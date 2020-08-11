@@ -2,7 +2,9 @@
 
 ## 功能
 
-    实现项目快捷交付、版本分支的快捷管理
+    1. 实现项目快捷交付、版本分支的快捷管理
+
+    2. 指定打包编译哪些子应用,逗号分隔多个应用
 
 ## 多子应用集成于同一个项目
 
@@ -38,11 +40,30 @@ yarn serve
 
 ## 已有命令解释
 
+
+1. clone   // 克隆需求版本源码
+
+2. build   // 指定打包编译哪些子应用,逗号分隔多个应用
+
 ```
 
-clone   // 克隆需求版本源码
+// 使用示例:
 
-generate:accept-goods // 生成新的项目文件[子应用模版]- 待扩展
+yarn build             // 交互式选择打包子应用
 
+yarn build pack1,pack2 // 打包子应用pack1、子应用pack2
+
+yarn build --all       // 打包所有子应用
+
+```
+
+3. generate:accept-goods // 生成新的项目文件[子应用模版]- 待扩展
+
+## NPM 推送
+
+```
+1. npm login -- xxx
+
+2. npm publish
 ```
 

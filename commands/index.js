@@ -3,16 +3,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 
 const chalk_1 = require("chalk");
 const actions_1 = require("./actions");
-const new_command_1 = require("./new.command");
+const build_command_1 = require("./build.command");
 const clone_command_1 = require("./clone.command");
 
 
 class CommandLoader {
     static load(program) {
         // program.option('--registry [registry]', 'npm 地址默认值 http://nexus.saas.hand-china.com/content/groups/hzero-npm-group/')
-        // new generate_command_1.GenerateCommand().load(program);
-        new new_command_1.NewCommand().load(program);
         new clone_command_1.CloneCommand(new actions_1.CloneAction).load(program);
+        new build_command_1.BuildCommand(new actions_1.BuildAction).load(program);
 
         this.handleInvalidCommand(program);
     }
