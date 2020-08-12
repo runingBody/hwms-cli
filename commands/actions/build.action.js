@@ -49,6 +49,7 @@ class BuildAction {
           ? packages.split(',')
           : packages
         : undefined,
+      allPackages,
     });
   }
 }
@@ -117,8 +118,9 @@ const replaceInputMissingInformation = (
  buildScript = async (options) => {
   // console.log('开始打包...', options);
   let buildPackageNames = [];
-  const { packages } = options;
+  const { packages, allPackages } = options;
   let cwd = process.cwd();
+  let vueBin = 'vue-cli-service build';
 
   const hipsRootConfig = paths.getHipsConfig(paths.appPath);
 
@@ -134,7 +136,7 @@ const replaceInputMissingInformation = (
     );
   }
 
-  // packages 下 找不到应用时
+  // packages 下 找不到子应用时
   if (buildPackageNames.length <= 0 || !buildPackageNames[0]) {
     if (!packages || packages.length <= 0 || !packages[0]) {
       // console.error('请指定需要编译的子应用');
@@ -144,49 +146,76 @@ const replaceInputMissingInformation = (
     buildPackageNames = packages;
   }
 
-  // 依次编译子应用
-  for (const name of buildPackageNames) {
-    try {
-      await new Promise((resolve, reject) => {
-        console.log(`正在打包 ${name} 子应用...`);
+  if(allPackages) { // 默认全部批量打包?
+    var allPromise = [];
+    for(const packageName of buildPackageNames) {
+      var selfPromise = new Promise((resolve, reject) => {
+        console.log(`Async packing ${packageName} ...`);
 
-        let vueBin = 'vue-cli-service build';
-        // const envBin = `cross-env VUE_APP_BUILD=release VUE_APP_TARGET=${name}`;
+        const cmd = `${vueBin} --mode production --dest dist/${packageName}`;
+        cmdExec(cmd, cwd, packageName, allPackages, reject, resolve);
+      })
+      allPromise.push(selfPromise);
+    }
 
-        const cmd = `${vueBin} --mode production --dest dist/${name}`;
-        child_process.exec(
-          cmd,
-          {
-            cwd,
-            env: {
-              ...process.env,
-              NODE_ENV: 'production',
-              VUE_APP_BUILD: 'release',
-              VUE_APP_TARGET: name,
-              // BABEL_ENV: 'production',
-            },
-          },
-          (error, stdout) => {
-            console.log('stdout', stdout);
-            if (error) {
-              return reject(error);
-            } else {
-              resolve({
-                stdout,
-                cwd,
-                name,
-              });
-            }
-          }
-        );
-      }).then((data) => {
-        const { name } = data;
-        console.log(`\n${INFO_PREFIX} ${name} Build Succeed`);
-      });
-    } catch (e) {
-      console.log(`\n${INFO_PREFIX} ${name} Build Failed`);
-      // console.error(e);
-      process.exit(1);
+    console.log(`\n ${INFO_PREFIX} Please waiting...`);
+
+    Promise.all(allPromise).then((result) => {
+      console.log('Asynchronous execution result:', `\n ${result}`);
+      console.log(`\n ${INFO_PREFIX} Async Build All Packages Succeed`);
+    }).catch((err) => {
+      console.log(`\n ${ERROR_PREFIX} Async Build All Packages Failed \n
+                   \n Err Info : ${err.message}`);
+    })
+
+  } else {
+    // 依次打包编译子应用
+    for (const name of buildPackageNames) {
+      try {
+        await new Promise((resolve, reject) => {
+          console.log(`Packing ${name} Sub application...`);
+          // const envBin = `cross-env VUE_APP_BUILD=release VUE_APP_TARGET=${name}`;
+
+          const cmd = `${vueBin} --mode production --dest dist/${name}`;
+
+          console.log(`\n${INFO_PREFIX} Please waiting...`);
+
+          cmdExec(cmd, cwd, name, allPackages, reject, resolve);
+        }).then((data) => {
+          const { name } = data;
+          console.log(`\n${INFO_PREFIX} ${name} Build Succeed`);
+        });
+      } catch (e) {
+        console.log(`\n${ERROR_PREFIX} ${name} Build Failed`);
+        // console.error(e);
+        process.exit(1);
+      }
     }
   }
+}
+
+const cmdExec = (cmd, cwd, name, allPackages, reject, resolve) => {
+  child_process.exec(
+    cmd,
+    {
+      cwd,
+      env: {
+        ...process.env,
+        NODE_ENV: 'production',
+        VUE_APP_BUILD: 'release',
+        VUE_APP_TARGET: name,
+        // BABEL_ENV: 'production',
+      },
+    },
+    (error, stdout) => {
+      if(!allPackages) console.log('Stdout:', stdout);
+      if (error) {
+        return reject(error);
+      } else {
+        resolve({
+          name,
+        });
+      }
+    }
+  );
 }
