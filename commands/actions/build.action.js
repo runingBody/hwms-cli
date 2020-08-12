@@ -161,7 +161,7 @@ const replaceInputMissingInformation = (
     console.log(`\n ${INFO_PREFIX} Please waiting...`);
 
     Promise.all(allPromise).then((result) => {
-      console.log('Asynchronous execution result:', `\n ${result}`);
+      console.log(`Asynchronous execution result: \n ${result}`);
       console.log(`\n ${INFO_PREFIX} Async Build All Packages Succeed`);
     }).catch((err) => {
       console.log(`\n ${ERROR_PREFIX} Async Build All Packages Failed \n
