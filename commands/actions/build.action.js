@@ -11,9 +11,9 @@ const paths = require('../../utils/paths');
 // import buildScript from 'hzero-webpack-scripts/scripts/build';
 
 const ERROR_PREFIX = chalk.bgRgb(210, 0, 75).bold.rgb(0, 0, 0)(
-  ' Error ',
+    ' Error ',
 ); const INFO_PREFIX = chalk.bgRgb(60, 190, 100).bold.rgb(0, 0, 0)(
-  ' Info ',
+    ' Info ',
 );
 
 class BuildAction {
@@ -34,10 +34,10 @@ class BuildAction {
 
   async runBuild(inputs, options) {
     const packagesBoolean = options.find(i => i.name === 'packages')
-      .value; // 
+        .value; //
 
     const allPackages = options.find(i => i.name === 'all')
-      .value; // 是否所有子应用 
+        .value; // 是否所有子应用
 
     if (!allPackages && !packagesBoolean) {
       await askForMissingInformation(options);
@@ -45,10 +45,10 @@ class BuildAction {
     const packages = getPackagesOptions(options).value;
     await buildScript({
       packages: packages
-        ? typeof packages === 'string'
-          ? packages.split(',')
-          : packages
-        : undefined,
+          ? typeof packages === 'string'
+              ? packages.split(',')
+              : packages
+          : undefined,
       allPackages,
     });
   }
@@ -58,7 +58,7 @@ exports.BuildAction = BuildAction;
 
 const askForMissingInformation = async (options) => {
   const nameInput = getPackagesOptions(options); // 获取 options 里所有 要打包的packages模块
-  
+
   if (!nameInput.value) {
 
     const prompt = inquirer.createPromptModule();
@@ -78,21 +78,21 @@ const askForMissingInformation = async (options) => {
 const getMicroPackages = () => {
   let buildPackageNames = [];
   const hipsRootConfig = paths.getHipsConfig(paths.appPath);;
-  
+
   if (hipsRootConfig && hipsRootConfig.packages) {
     buildPackageNames = hipsRootConfig.packages
-      .filter(item => !item.external)
-      .map(item => item.name);
+        .filter(item => !item.external)
+        .map(item => item.name);
   }
 
   return buildPackageNames;
 };
 
 const getPackagesOptions = (inputs) =>
-  inputs.find(input => input.name === 'packages');
+    inputs.find(input => input.name === 'packages');
 
 const generateSelect = (
-  name
+    name
 ) => {
   return (message) => {
     return (choices) => ({
@@ -105,17 +105,17 @@ const generateSelect = (
 };
 
 const replaceInputMissingInformation = (
-  inputs,
-  answers
+    inputs,
+    answers
 ) => {
   return inputs.map(
-    input =>
-      (input.value =
-        input.value !== undefined ? input.value : answers[input.name])
+      input =>
+          (input.value =
+              input.value !== undefined ? input.value : answers[input.name])
   );
 };
 
- buildScript = async (options) => {
+buildScript = async (options) => {
   // console.log('开始打包...', options);
   let buildPackageNames = [];
   const { packages, allPackages } = options;
@@ -123,16 +123,23 @@ const replaceInputMissingInformation = (
   let vueBin = 'vue-cli-service build';
 
   const hipsRootConfig = paths.getHipsConfig(paths.appPath);
+  var list_map = new Map();
 
   if (hipsRootConfig && hipsRootConfig.packages) {
     buildPackageNames = hipsRootConfig.packages
-      .filter((item) => !item.external)
-      .map((item) => item.name);
+        .filter((item) => !item.external)
+        .map((item) => item.name);
+    hipsRootConfig.packages
+        .filter(item => !item.external).forEach(e=>{
+      if(!e.mode){
+        e.mode=e.name;
+      }
+      list_map.set(e.name,e.mode);
+    });
   }
-
   if (packages) {
     buildPackageNames = buildPackageNames.filter((item) =>
-      packages.includes(item)
+        packages.includes(item)
     );
   }
 
@@ -149,10 +156,12 @@ const replaceInputMissingInformation = (
   if(allPackages) { // 默认全部批量打包?
     var allPromise = [];
     for(const packageName of buildPackageNames) {
+      var mode=list_map.get(packageName);
+      if(!mode)mode="production";//没有包的时候默认设置为生产
       var selfPromise = new Promise((resolve, reject) => {
         console.log(`Async packing ${packageName} ...`);
 
-        const cmd = `${vueBin} --mode production --dest dist/${packageName}`;
+        const cmd = `${vueBin} --mode ${mode} --dest dist/${packageName}`;
         cmdExec(cmd, cwd, packageName, allPackages, reject, resolve);
       })
       allPromise.push(selfPromise);
@@ -176,7 +185,7 @@ const replaceInputMissingInformation = (
           console.log(`Packing ${name} Sub application...`);
           // const envBin = `cross-env VUE_APP_BUILD=release VUE_APP_TARGET=${name}`;
 
-          const cmd = `${vueBin} --mode production --dest dist/${name}`;
+          const cmd = `${vueBin} --mode ${mode} --dest dist/${name}`;
 
           console.log(`\n${INFO_PREFIX} Please waiting...`);
 
@@ -196,26 +205,26 @@ const replaceInputMissingInformation = (
 
 const cmdExec = (cmd, cwd, name, allPackages, reject, resolve) => {
   child_process.exec(
-    cmd,
-    {
-      cwd,
-      env: {
-        ...process.env,
-        NODE_ENV: 'production',
-        VUE_APP_BUILD: 'release',
-        VUE_APP_TARGET: name,
-        // BABEL_ENV: 'production',
+      cmd,
+      {
+        cwd,
+        env: {
+          ...process.env,
+          NODE_ENV: 'production',
+          VUE_APP_BUILD: 'release',
+          VUE_APP_TARGET: name,
+          // BABEL_ENV: 'production',
+        },
       },
-    },
-    (error, stdout) => {
-      if(!allPackages) console.log('Stdout:', stdout);
-      if (error) {
-        return reject(error);
-      } else {
-        resolve({
-          name,
-        });
+      (error, stdout) => {
+        if(!allPackages) console.log('Stdout:', stdout);
+        if (error) {
+          return reject(error);
+        } else {
+          resolve({
+            name,
+          });
+        }
       }
-    }
   );
 }
