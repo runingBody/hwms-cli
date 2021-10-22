@@ -67,3 +67,28 @@ yarn build --all       // 打包所有子应用
 2. npm publish
 ```
 
+## 项目使用说明
+
+####1.安装好cli命令行工具包, 并且配置好package.json之后,还有一步至关重要的操作,.
+####2.添加 .hipsrcm.js 配置文件
+####配置文件内容如下
+```
+module.exports =  {
+  "packages": [
+    {
+      "name": "hechi",
+      "mode":"hechi"
+    },
+    {
+      "name": "hezhou"
+    },
+    {
+      "name": "chongzuo"
+    },
+  ],
+  "hipsBoot": ".",
+};
+
+```
+####mode没有设置会默认采用name对应的环境变量
+
